@@ -15,3 +15,11 @@ It is based on ami-7edc8a14.
     > sudo bin/setup
     > exit
     $ bin/test
+
+# Customization
+
+### Mongo User
+
+    > MONGO_USER=bam MONGO_PASS=bam sudo -E bin/setup
+    > exit
+    $ MONGO_URL=mongodb://bam:bam@10.11.12.27 bin/test

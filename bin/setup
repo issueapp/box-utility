@@ -2,7 +2,10 @@
 #
 # usage: sudo bin/setup
 
-bin/mongo
+: ${MONGO_USER:=bam}
+: ${MONGO_PASS:=bam}
+
+USR=$MONGO_USER PAS=$MONGO_PASS bin/mongo
 
 # install CI server
 #bin/ci

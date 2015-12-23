@@ -6,6 +6,9 @@
 #   - https://docs.mongodb.org/v2.6/tutorial/install-mongodb-on-ubuntu/
 #   - https://docs.mongodb.org/v2.6/reference/method/db.addUser/
 
+: ${USR:=bam}
+: ${PAS:=bam}
+
 if ! which mongo > /dev/null
 then
   apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
@@ -59,13 +62,16 @@ service mongod restart
 
 # grep '[initandlisten] waiting for connections on port 27017' /data/log/mongo
 
-mongo << create_user
-db.createUser({
-  user: "bam",
-  pwd: "bam",
-  roles: [
-    {role: "dbOwner", db: "issue_stage"},
-    {role: "dbOwner", db: "issue_production"}
-  ]
-});
+mongo admin << create_user
+var exist = db.system.users.find({user:'$USR'}).count() > 0;
+if (! exist) {
+  db.createUser({
+    user: "$USR",
+    pwd: "$PAS",
+    roles: [
+      {role: "dbOwner", db: "issue_stage"},
+      {role: "dbOwner", db: "issue_production"}
+    ]
+  });
+}
 create_user

@@ -3,9 +3,10 @@
 require 'date'
 require 'moped'
 
+uri = ENV['MONGO_URL'] || 'mongodb://bam:bam@10.11.12.27'
+
 %w[issue_stage issue_production].each do |name|
-  uri = "mongodb://bam:bam@10.11.12.27/#{name}"
-  db = Moped::Session.connect(uri)
+  db = Moped::Session.connect("#{uri}/#{name}")
 
   collection = db[:people]
   collection.insert(name: 'LaRouche')
