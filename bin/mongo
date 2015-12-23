@@ -1,0 +1,71 @@
+#!/usr/bin/env sh
+#
+# usage: sudo bin/mongo
+#
+# references:
+#   - https://docs.mongodb.org/v2.6/tutorial/install-mongodb-on-ubuntu/
+#   - https://docs.mongodb.org/v2.6/reference/method/db.addUser/
+
+if ! which mongo > /dev/null
+then
+  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+  echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | tee /etc/apt/sources.list.d/mongodb.list
+  apt-get update
+
+  apt-get install -y mongodb-org=2.6.9 mongodb-org-server=2.6.9 mongodb-org-shell=2.6.9 mongodb-org-mongos=2.6.9 mongodb-org-tools=2.6.9
+
+  echo "mongodb-org hold" | dpkg --set-selections
+  echo "mongodb-org-server hold" | dpkg --set-selections
+  echo "mongodb-org-shell hold" | dpkg --set-selections
+  echo "mongodb-org-mongos hold" | dpkg --set-selections
+  echo "mongodb-org-tools hold" | dpkg --set-selections
+fi
+
+if ! getent group idata > /dev/null 2>&1
+then
+  if ! groupadd --system idata
+  then
+    echo Fail to create idata system group
+    exit
+  fi
+fi
+
+if getent passwd mongodb > /dev/null 2>&1
+then
+  usermod -a -G idata mongodb
+fi
+
+if getent passwd elasticsearch > /dev/null 2>&1
+then
+  usermod -a -G idata elasticsearch
+fi
+
+if ! groups mongodb | grep -q idata
+then
+  echo mongodb is not in idata group
+  exit
+fi
+
+mkdir -p /data/log/mongo /data/db/mongo
+chown -R :idata /data
+chmod -R 775 /data
+
+set_db_path="s/^dbpath=.\+$/dbpath=\/data\/db\/mongo/"
+set_log_path="s/^logpath=.\+$/logpath=\/data\/log\/mongo\/mongo.log/"
+listen_all="s/^bind_ip/#bind_ip/"
+sed -i -e $set_log_path -e $set_db_path -e $listen_all /etc/mongod.conf
+
+service mongod restart
+
+# grep '[initandlisten] waiting for connections on port 27017' /data/log/mongo
+
+mongo << create_user
+db.createUser({
+  user: "bam",
+  pwd: "bam",
+  roles: [
+    {role: "dbOwner", db: "issue_stage"},
+    {role: "dbOwner", db: "issue_production"}
+  ]
+});
+create_user

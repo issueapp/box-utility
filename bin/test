@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require 'date'
+require 'moped'
+
+%w[issue_stage issue_production].each do |name|
+  uri = "mongodb://bam:bam@10.11.12.27/#{name}"
+  db = Moped::Session.connect(uri)
+
+  collection = db[:people]
+  collection.insert(name: 'LaRouche')
+  doc = collection.find(name: 'LaRouche').one
+
+  if doc['name'] == 'LaRouche'
+    puts "#{uri} is functional"
+  else
+    puts "#{uri} is broken"
+  end
+
+  collection.drop
+end

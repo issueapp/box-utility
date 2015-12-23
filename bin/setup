@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+#
+# usage: sudo bin/setup
+
+bin/mongo
+
+# install CI server
+#bin/ci
