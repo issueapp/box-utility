@@ -6,16 +6,17 @@ require 'moped'
 uri = ENV['MONGO_URL'] || 'mongodb://bam:bam@10.11.12.27'
 
 %w[issue_stage issue_production].each do |name|
-  db = Moped::Session.connect("#{uri}/#{name}")
+  url = "#{uri}/#{name}"
+  db = Moped::Session.connect(url)
 
   collection = db[:people]
   collection.insert(name: 'LaRouche')
   doc = collection.find(name: 'LaRouche').one
 
   if doc['name'] == 'LaRouche'
-    puts "#{uri} is functional"
+    puts "#{url} is functional"
   else
-    puts "#{uri} is broken"
+    puts "#{url} is broken"
   end
 
   collection.drop
