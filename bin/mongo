@@ -65,13 +65,17 @@ service mongod restart
 mongo admin << create_user
 var exist = db.system.users.find({user:'$USR'}).count() > 0;
 if (! exist) {
+  use issue_stage;
   db.createUser({
     user: "$USR",
     pwd: "$PAS",
-    roles: [
-      {role: "dbOwner", db: "issue_stage"},
-      {role: "dbOwner", db: "issue_production"}
-    ]
+    roles: ["dbOwner"]
+  });
+  use issue_production;
+  db.createUser({
+    user: "$USR",
+    pwd: "$PAS",
+    roles: ["dbOwner"]
   });
 }
 create_user
