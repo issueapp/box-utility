@@ -5,7 +5,7 @@ Utility box hosts:
 - elasticsearch monitor
 - CI
 
-It is based on ami-7edc8a14.
+It is based on elasticsearch-monitor AMI: ami-7edc8a14.
 
 # Getting Started
 
